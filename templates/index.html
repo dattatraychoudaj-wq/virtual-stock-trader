@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f2f4f0">
+    <title>Virtual Stock Trader</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #202b27;
+            --muted: #69736e;
+            --line: #dce2dc;
+            --paper: #f2f4f0;
+            --surface: #ffffff;
+            --green: #176b50;
+            --green-soft: #e2f2e9;
+            --red: #b34e40;
+            --red-soft: #fae8e3;
+            --gold: #d6a748;
+            --shadow: 0 14px 34px rgba(32, 43, 39, 0.07);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background-color: var(--paper);
+            background-image: linear-gradient(rgba(32, 43, 39, 0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(32, 43, 39, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            font-size: 14px;
+        }
+
+        button, input, select { font: inherit; }
+        button { cursor: pointer; }
+
+        .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 22px 0 48px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 4px 0 23px; border-bottom: 1px solid var(--line); }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 9px; color: #fff; background: var(--ink); font-size: 13px; font-weight: 800; }
+        .brand-name { font-size: 15px; font-weight: 800; }
+        .brand-subtitle, .eyebrow { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .brand-subtitle { margin-top: 3px; }
+        .market-status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+
+        .page-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 29px 0 21px; }
+        h1, h2, p { margin: 0; }
+        h1 { font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif; font-size: 32px; font-weight: 600; }
+        .page-heading p { margin-top: 5px; color: var(--muted); }
+        .data-note { color: var(--muted); font-size: 11px; text-align: right; }
+
+        .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 21px; }
+        .metric { padding: 15px 18px 16px 0; }
+        .metric + .metric { padding-left: 20px; border-left: 1px solid var(--line); }
+        .metric-label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .metric-value { margin-top: 7px; font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .positive { color: var(--green); }
+        .negative { color: var(--red); }
+
+        .content-grid { display: grid; grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1.6fr); gap: 18px; align-items: start; }
+        .panel { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow); }
+        .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 19px; border-bottom: 1px solid var(--line); }
+        .panel-heading h2 { font-size: 15px; font-weight: 800; }
+        .panel-heading .eyebrow { margin-bottom: 4px; }
+        .trade-body { padding: 18px 19px 19px; }
+        .quote { min-height: 96px; display: flex; flex-direction: column; justify-content: center; padding: 15px; border: 1px solid #d2e7da; border-radius: 6px; background: linear-gradient(120deg, #eaf5ed, #f7f4e9); }
+        .quote-label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .quote-price { margin-top: 4px; font-size: 27px; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .quote-time { margin-top: 2px; color: var(--muted); font-size: 11px; }
+        .field { display: grid; gap: 6px; margin-top: 15px; }
+        .field label { color: var(--muted); font-size: 11px; font-weight: 700; }
+        .field select, .field input { width: 100%; height: 40px; padding: 0 11px; border: 1px solid var(--line); border-radius: 5px; outline: none; color: var(--ink); background: #fff; }
+        .field select:focus, .field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23, 107, 80, 0.12); }
+        .field-row { display: grid; grid-template-columns: 1fr 0.72fr; gap: 10px; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 17px; }
+        .button { min-height: 40px; border: 1px solid transparent; border-radius: 5px; padding: 0 13px; font-weight: 800; transition: filter 130ms ease, transform 130ms ease; }
+        .button:hover { filter: brightness(0.95); }
+        .button:active { transform: translateY(1px); }
+        .button:disabled { cursor: wait; opacity: 0.6; }
+        .button-check { grid-column: 1 / -1; color: var(--ink); border-color: var(--line); background: #fff; }
+        .button-buy { color: white; background: var(--green); }
+        .button-sell { color: white; background: var(--red); }
+        .message { min-height: 20px; margin-top: 12px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .message.error { color: var(--red); }
+        .message.success { color: var(--green); }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; white-space: nowrap; }
+        th { padding: 11px 13px; color: var(--muted); background: #f7f8f6; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        td { padding: 12px 13px; border-top: 1px solid #edf0ec; font-size: 12px; font-variant-numeric: tabular-nums; }
+        tbody tr:hover { background: #fafbf9; }
+        .symbol-cell { font-weight: 800; }
+        .empty-state { padding: 25px 15px; color: var(--muted); text-align: center; white-space: normal; }
+        .portfolio-panel { grid-column: 2; grid-row: 1; }
+        .transactions-panel { margin-top: 18px; }
+        .count { color: var(--muted); font-size: 11px; }
+
+        @media (max-width: 760px) {
+            .shell { width: min(100% - 24px, 600px); padding-top: 13px; }
+            .page-heading { align-items: start; flex-direction: column; gap: 8px; padding-top: 22px; }
+            .data-note { text-align: left; }
+            .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .metric { padding: 13px 10px 13px 0; }
+            .metric + .metric { padding-left: 12px; }
+            .metric:nth-child(3) { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
+            .metric:nth-child(4) { border-top: 1px solid var(--line); }
+            .metric-value { font-size: 18px; }
+            .content-grid { grid-template-columns: 1fr; }
+            .portfolio-panel { grid-column: auto; grid-row: auto; }
+            .transactions-panel { margin-top: 14px; }
+        }
+
+        @media (max-width: 420px) {
+            .market-status { font-size: 0; }
+            .market-status .status-dot { margin-right: 5px; }
+            h1 { font-size: 28px; }
+            .panel-heading, .trade-body { padding-left: 14px; padding-right: 14px; }
+            th, td { padding-left: 10px; padding-right: 10px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark" aria-hidden="true">VT</div>
+                <div>
+                    <div class="brand-name">Virtual Stock Trader</div>
+                    <div class="brand-subtitle">Paper trading desk</div>
+                </div>
+            </div>
+            <div class="market-status"><span class="status-dot" aria-hidden="true"></span>CSV market data</div>
+        </header>
+
+        <main>
+            <div class="page-heading">
+                <div>
+                    <div class="eyebrow">Account overview</div>
+                    <h1>Trading desk</h1>
+                    <p>Market replay and portfolio activity</p>
+                </div>
+                <div class="data-note">Prices are simulated from the project CSV.</div>
+            </div>
+
+            <section class="metrics" aria-label="Account summary">
+                <div class="metric"><div class="metric-label">Available cash</div><div class="metric-value" id="balance">...</div></div>
+                <div class="metric"><div class="metric-label">Invested</div><div class="metric-value" id="investedValue">...</div></div>
+                <div class="metric"><div class="metric-label">Holdings value</div><div class="metric-value" id="currentValue">...</div></div>
+                <div class="metric"><div class="metric-label">Unrealized P/L</div><div class="metric-value" id="unrealizedPnl">...</div></div>
+            </section>
+
+            <div class="content-grid">
+                <section class="panel trade-panel" aria-labelledby="tradeHeading">
+                    <div class="panel-heading">
+                        <div><div class="eyebrow">Market order</div><h2 id="tradeHeading">Trade a stock</h2></div>
+                    </div>
+                    <div class="trade-body">
+                        <div class="quote" aria-live="polite">
+                            <div class="quote-label" id="quoteLabel">Selected stock</div>
+                            <div class="quote-price" id="quotePrice">--</div>
+                            <div class="quote-time" id="quoteTime">Choose a time and check the price</div>
+                        </div>
+                        <div class="field">
+                            <label for="symbol">Stock</label>
+                            <select id="symbol" required></select>
+                        </div>
+                        <div class="field">
+                            <label for="datetime">Market date and time</label>
+                            <input type="datetime-local" id="datetime" step="1800" value="2026-09-01T09:30" required>
+                        </div>
+                        <div class="field">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" placeholder="Shares to trade" min="1" step="1" value="1" required>
+                        </div>
+                        <div class="actions">
+                            <button class="button button-check" id="priceButton" type="button">Check price</button>
+                            <button class="button button-buy" id="buyButton" type="button">Buy</button>
+                            <button class="button button-sell" id="sellButton" type="button">Sell</button>
+                        </div>
+                        <div class="message" id="tradeMessage" role="status" aria-live="polite"></div>
+                    </div>
+                </section>
+
+                <section class="panel portfolio-panel" aria-labelledby="portfolioHeading">
+                    <div class="panel-heading">
+                        <div><div class="eyebrow">Open positions</div><h2 id="portfolioHeading">Portfolio</h2></div>
+                        <span class="count" id="holdingCount">0 holdings</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table id="portfolioTable">
+                            <thead><tr><th>Symbol</th><th>Qty</th><th>Avg price</th><th>Market price</th><th>Value</th><th>P/L</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <section class="panel transactions-panel" aria-labelledby="transactionsHeading">
+                <div class="panel-heading">
+                    <div><div class="eyebrow">Account activity</div><h2 id="transactionsHeading">Transaction history</h2></div>
+                    <span class="count" id="transactionCount">0 trades</span>
+                </div>
+                <div class="table-wrap">
+                    <table id="txnTable">
+                        <thead><tr><th>Stock</th><th>Action</th><th>Qty</th><th>Price</th><th>Trade time</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 });
+        const number = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });
+        const symbols = document.getElementById('symbol');
+        const timeField = document.getElementById('datetime');
+        const message = document.getElementById('tradeMessage');
+
+        function formatCurrency(value) {
+            return currency.format(Number(value) || 0);
+        }
+
+        async function requestJson(url, options) {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'The request could not be completed.');
+            return data;
+        }
+
+        function selectedDatetime() {
+            const value = timeField.value;
+            return value ? `${value.replace('T', ' ')}:00` : '';
+        }
+
+        function setMessage(text, kind = '') {
+            message.textContent = text;
+            message.className = `message ${kind}`;
+        }
+
+        function makeCell(value, className = '') {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            if (className) cell.className = className;
+            return cell;
+        }
+
+        function showEmptyRow(tbody, columns, text) {
+            const row = document.createElement('tr');
+            const cell = makeCell(text, 'empty-state');
+            cell.colSpan = columns;
+            row.append(cell);
+            tbody.replaceChildren(row);
+        }
+
+        async function loadStocks() {
+            try {
+                const stockList = await requestJson('/stocks');
+                symbols.replaceChildren(...stockList.map((stock) => {
+                    const option = document.createElement('option');
+                    option.value = stock;
+                    option.textContent = stock;
+                    return option;
+                }));
+                if (stockList.length) await getPrice();
+            } catch (error) {
+                setMessage(error.message, 'error');
+            }
+        }
+
+        async function getPrice() {
+            if (!symbols.value || !selectedDatetime()) {
+                setMessage('Choose a stock and market date/time.', 'error');
+                return;
+            }
+            const query = new URLSearchParams({ symbol: symbols.value, datetime: selectedDatetime() });
+            try {
+                const data = await requestJson(`/price?${query}`);
+                document.getElementById('quoteLabel').textContent = data.symbol;
+                document.getElementById('quotePrice').textContent = formatCurrency(data.price);
+                document.getElementById('quoteTime').textContent = `Price at ${data.datetime}`;
+                setMessage('Price updated.', 'success');
+            } catch (error) {
+                document.getElementById('quotePrice').textContent = '--';
+                document.getElementById('quoteTime').textContent = 'No price available for that selection.';
+                setMessage(error.message, 'error');
+            }
+        }
+
+        async function trade(action) {
+            const quantity = document.getElementById('quantity').value;
+            const datetime = selectedDatetime();
+            if (!symbols.value || !datetime || !quantity || Number(quantity) < 1 || !Number.isInteger(Number(quantity))) {
+                setMessage('Choose a stock, date/time, and positive whole-number quantity.', 'error');
+                return;
+            }
+            const buttons = [document.getElementById('buyButton'), document.getElementById('sellButton')];
+            buttons.forEach((button) => { button.disabled = true; });
+            try {
+                const data = await requestJson(`/${action}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: symbols.value, quantity, datetime })
+                });
+                const detail = action === 'buy' ? `Cost ${formatCurrency(data.cost)}` : `Proceeds ${formatCurrency(data.proceeds)} · P/L ${formatCurrency(data.realized_pnl)}`;
+                setMessage(`${data.message}. ${detail}.`, 'success');
+                await Promise.all([loadPortfolio(), loadTransactions()]);
+            } catch (error) {
+                setMessage(error.message, 'error');
+            } finally {
+                buttons.forEach((button) => { button.disabled = false; });
+            }
+        }
+
+        async function loadPortfolio() {
+            try {
+                const data = await requestJson('/portfolio');
+                document.getElementById('balance').textContent = formatCurrency(data.balance);
+                document.getElementById('investedValue').textContent = formatCurrency(data.total_invested);
+                document.getElementById('currentValue').textContent = formatCurrency(data.total_current_value);
+                const pnl = document.getElementById('unrealizedPnl');
+                pnl.textContent = formatCurrency(data.total_unrealized_pnl);
+                pnl.className = `metric-value ${data.total_unrealized_pnl >= 0 ? 'positive' : 'negative'}`;
+
+                const tbody = document.querySelector('#portfolioTable tbody');
+                document.getElementById('holdingCount').textContent = `${data.holdings.length} ${data.holdings.length === 1 ? 'holding' : 'holdings'}`;
+                if (!data.holdings.length) {
+                    showEmptyRow(tbody, 6, 'No open positions');
+                    return;
+                }
+                tbody.replaceChildren(...data.holdings.map((holding) => {
+                    const row = document.createElement('tr');
+                    row.append(makeCell(holding.symbol, 'symbol-cell'));
+                    row.append(makeCell(number.format(holding.quantity)));
+                    row.append(makeCell(formatCurrency(holding.avg_price)));
+                    row.append(makeCell(formatCurrency(holding.current_price)));
+                    row.append(makeCell(formatCurrency(holding.current_value)));
+                    row.append(makeCell(formatCurrency(holding.unrealized_pnl), holding.unrealized_pnl >= 0 ? 'positive' : 'negative'));
+                    return row;
+                }));
+            } catch (error) {
+                document.getElementById('balance').textContent = 'Unavailable';
+                setMessage(error.message, 'error');
+            }
+        }
+
+        async function loadTransactions() {
+            try {
+                const transactions = await requestJson('/transactions');
+                const tbody = document.querySelector('#txnTable tbody');
+                document.getElementById('transactionCount').textContent = `${transactions.length} ${transactions.length === 1 ? 'trade' : 'trades'}`;
+                if (!transactions.length) {
+                    showEmptyRow(tbody, 5, 'No transactions yet');
+                    return;
+                }
+                tbody.replaceChildren(...transactions.map((transaction) => {
+                    const row = document.createElement('tr');
+                    row.append(makeCell(transaction.symbol, 'symbol-cell'));
+                    row.append(makeCell(transaction.action, transaction.action === 'BUY' ? 'positive' : 'negative'));
+                    row.append(makeCell(number.format(transaction.quantity)));
+                    row.append(makeCell(formatCurrency(transaction.price)));
+                    row.append(makeCell(transaction.trade_time));
+                    return row;
+                }));
+            } catch (error) {
+                const tbody = document.querySelector('#txnTable tbody');
+                showEmptyRow(tbody, 5, error.message);
+            }
+        }
+
+        document.getElementById('priceButton').addEventListener('click', getPrice);
+        document.getElementById('buyButton').addEventListener('click', () => trade('buy'));
+        document.getElementById('sellButton').addEventListener('click', () => trade('sell'));
+        symbols.addEventListener('change', getPrice);
+        timeField.addEventListener('change', getPrice);
+        loadStocks();
+        Promise.all([loadPortfolio(), loadTransactions()]);
+    </script>
+</body>
+</html>
