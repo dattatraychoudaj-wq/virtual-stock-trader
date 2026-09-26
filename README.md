@@ -57,11 +57,9 @@ Open <http://127.0.0.1:5000/>. The stock list, price lookup, portfolio, and tran
 
 ## Screenshots
 
-Add screenshots of the running dashboard here before publishing the project. For example:
+### Trading Dashboard
 
-```markdown
-![Trading dashboard](screenshots/dashboard.png)
-```
+![Virtual Stock Trader dashboard showing the quote panel, portfolio, account summary, and transaction history](screenshots/dashboard.png)
 
 ## Demo Video Outline (2–3 minutes)
 
