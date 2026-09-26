@@ -63,6 +63,6 @@ Open <http://127.0.0.1:5000/>. The stock list, price lookup, portfolio, and tran
 
 ## Demo Video
 
-**Recording:** _Add the hosted demo video URL here after recording._
+**[Watch or download the 30-second demo](virtual-stock-trader-30-second-demo.mp4)**
 
-The timed narration, scene list, and recording checklist are in [DEMO_SCRIPT.md](DEMO_SCRIPT.md). The 2–3 minute walkthrough covers historical price lookup, a virtual buy and sell, portfolio P/L, transaction history, and the Flask/SQLite/CSV stack. The video should make clear that prices are sample historical data and trades use virtual money only.
+The screen recording shows the trading dashboard. Prices are sample historical data and trades use virtual money only. The longer walkthrough plan is in [DEMO_SCRIPT.md](DEMO_SCRIPT.md).
