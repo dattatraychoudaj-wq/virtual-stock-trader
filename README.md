@@ -61,14 +61,8 @@ Open <http://127.0.0.1:5000/>. The stock list, price lookup, portfolio, and tran
 
 ![Virtual Stock Trader dashboard showing the quote panel, portfolio, account summary, and transaction history](screenshots/dashboard.png)
 
-## Demo Video Outline (2–3 minutes)
+## Demo Video
 
-1. Introduce the simulator and clarify that it uses virtual money.
-2. Select a stock and date/time, then check its historical price.
-3. Buy shares and show the available cash and portfolio update.
-4. Sell some shares and show sale proceeds and realized P/L.
-5. Explain average price, market value, and unrealized P/L in the portfolio.
-6. Show the transaction history.
-7. Briefly mention Flask, SQLite, and CSV market data.
+**Recording:** _Add the hosted demo video URL here after recording._
 
-Record the screen and narration with OBS Studio or Windows Game Bar (`Win+G`). Avoid showing secrets or unrelated personal information in the recording.
+The timed narration, scene list, and recording checklist are in [DEMO_SCRIPT.md](DEMO_SCRIPT.md). The 2–3 minute walkthrough covers historical price lookup, a virtual buy and sell, portfolio P/L, transaction history, and the Flask/SQLite/CSV stack. The video should make clear that prices are sample historical data and trades use virtual money only.
